@@ -1,0 +1,56 @@
+.container.device-history-page {
+    max-width    : 1100px;
+    margin       : 0 auto;
+    padding      : 20px;
+    background   : #f9f9f9;
+    border-radius: 10px;
+    box-shadow   : 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.container.device-history-page h3 {
+    text-align   : center;
+    color        : #333;
+    margin-bottom: 40px !important;
+}
+
+.search-input {
+    margin-bottom: 10px !important;
+}
+
+.history-table {
+    border-radius: 10px;
+    overflow     : hidden;
+    width        : 100%;
+}
+
+.MuiTable-root {
+    background: #fff;
+}
+
+.MuiTableHead-root {
+    background: #1976d2;
+}
+
+.MuiTableHead-root .MuiTableCell-root {
+    color      : #fff;
+    font-weight: bold;
+}
+
+.MuiTableRow-root:nth-child(even) {
+    background: #f1f1f1;
+}
+
+.MuiTableRow-root:hover {
+    background: #e3f2fd;
+}
+
+.MuiTableCell-root {
+    padding      : 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.MuiPagination-root {
+    display        : flex;
+    justify-content: center;
+    margin-top     : 10px;
+}

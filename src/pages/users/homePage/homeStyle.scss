@@ -1,0 +1,131 @@
+.homepage {
+    display       : flex;
+    flex-direction: column;
+    align-items   : center;
+    padding       : 20px;
+
+    .dashboard {
+        display        : flex;
+        align-items    : center;
+        justify-content: space-between;
+        width          : 100%;
+        max-width      : 990px;
+        gap            : 25px; // Khoảng cách rộng hơn một chút
+    }
+
+    .sensor-info {
+        display        : flex;
+        gap            : 20px;
+        justify-content: center;
+        flex-wrap      : wrap;
+
+        .sensor-card {
+            width        : 220px;
+            text-align   : center;
+            background   : white;
+            padding      : 18px;
+            border-radius: 12px; // Bo góc hơn
+            box-shadow   : 0 4px 8px rgba(0, 0, 0, 0.1); // Đổ bóng mềm hơn
+            transition   : transform 0.2s ease-in-out;
+
+            &:hover {
+                transform : translateY(-3px);
+                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            }
+        }
+    }
+
+    .chart-container {
+        flex           : 4;
+        background     : linear-gradient(135deg, #f9f9f9, #ffffff);
+        padding        : 20px;
+        border-radius  : 15px;
+        box-shadow     : 0 4px 8px rgba(0, 0, 0, 0.1);
+        display        : flex;
+        align-items    : center;
+        justify-content: center;
+        height         : 400px;
+        flex-direction : column;
+
+    }
+
+    .device-control {
+        flex           : 1;
+        background     : #4dd6c28f;
+        padding        : 20px;
+        border-radius  : 15px;
+        box-shadow     : 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align     : center;
+        min-width      : 220px;
+        display        : flex;
+        flex-direction : column;
+        justify-content: center;
+
+        h2 {
+            font-size    : 18px;
+            margin-bottom: 15px;
+            font-weight  : 600;
+            color        : #333;
+        }
+    }
+
+    .device-list {
+        display       : flex;
+        flex-direction: column;
+        align-items   : center;
+        gap           : 12px;
+    }
+
+    .device-item {
+        display       : flex;
+        flex-direction: column;
+        align-items   : center;
+        background    : white;
+        padding       : 12px;
+        border-radius : 12px;
+        box-shadow    : 0 3px 6px rgba(0, 0, 0, 0.1);
+        transition    : transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        width         : 100%;
+        max-width     : 160px;
+        min-height    : 90px;
+
+        &.active {
+            background: #e3f2fd;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        &:hover {
+            transform : scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        span {
+            font-size    : 15px;
+            font-weight  : 600;
+            margin-bottom: 5px;
+        }
+    }
+
+    .device-switch {
+        transform      : scale(0.7);
+        display        : flex;
+        justify-content: center;
+        align-items    : center;
+
+        .MuiSwitch-thumb {
+            background-color: white;
+        }
+
+        .MuiSwitch-track {
+            background-color: #ccc !important;
+        }
+
+        &.Mui-checked .MuiSwitch-thumb {
+            background-color: #4caf50;
+        }
+
+        &.Mui-checked .MuiSwitch-track {
+            background-color: #81c784 !important;
+        }
+    }
+}

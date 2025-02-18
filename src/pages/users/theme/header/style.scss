@@ -1,0 +1,101 @@
+@use "sass:map"; // syntax để dùng để nhúng 1 thằng scss vào 1 thằng scss khác, cái này thì chỉ dùng cho sass
+@import "style/pages/theme.scss";
+
+
+.header {
+    background-color: #9ee1b9;
+    height          : 70px !important;
+    margin-bottom   : 10px
+}
+
+.header__menu {
+    padding: 24px 0;
+
+    ul {
+        display        : flex;
+        justify-content: space-between;
+
+        li {
+            list-style: none;
+            position  : relative;
+
+            a {
+                text-decoration: none;
+                font-size      : 14px;
+                color          : map.get($theme-colors, "bold-text");
+                text-transform : uppercase;
+                font-weight    : bold;
+                letter-spacing : 2px;
+                transition     : all 0.3s;
+                padding        : 5px 0;
+                display        : block;
+            }
+        }
+
+        li:hover .header__menu__dropdown {
+            opacity   : 1;
+            visibility: visible;
+
+        }
+
+        .active a {
+            color: map.get($theme-colors, "main");
+        }
+
+        .header__menu__dropdown {
+            background: #222222;
+            display   : block;
+            position  : absolute;
+            width     : 180px;
+            z-index   : 9;
+            padding   : 5px 0;
+            transition: all, 0.3s;
+            opacity   : 0;
+            visibility: hidden;
+
+            li {
+                a {
+                    color         : #fff;
+                    text-transform: capitalize;
+                    font-weight   : 400;
+                    padding       : 5px 15px;
+                }
+
+                :hover {
+                    color: map.get($theme-colors, "main");
+
+                }
+            }
+        }
+    }
+}
+
+.header__logo {
+    padding: 15px 0;
+
+}
+
+.header__cart {
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    padding        : 24px 0;
+
+    a {
+        text-decoration: none;
+
+        svg {
+            font-size: 25px;
+            color    : map.get($theme-colors, "normal-text");
+        }
+
+        span {
+            margin-left: 10px;
+            font-weight: bold;
+
+            color: map.get($theme-colors, "normal-text");
+
+        }
+    }
+
+}
