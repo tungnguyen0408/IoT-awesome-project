@@ -14,7 +14,7 @@ h3 {
 }
 
 .search-bar {
-    margin-bottom: 15px;
+    margin-bottom: 15px !important;
 }
 
 .sensor-table {
@@ -40,6 +40,10 @@ h3 {
     background: #f1f1f1;
 }
 
+.MuiTableRow-head:hover {
+    background: #1976d2 !important;
+}
+
 .MuiTableRow-root:hover {
     background: #e3f2fd;
 }
@@ -49,3 +53,36 @@ h3 {
     justify-content: center;
     margin-top     : 10px;
 }
+
+// .MuiTablePagination-root {
+//     display        : flex;
+//     justify-content: center;
+//     align-items    : center;
+//     margin-top     : 15px;
+//     padding        : 10px;
+//     background     : #fff;
+//     border-radius  : 8px;
+//     box-shadow     : 0 2px 5px rgba(0, 0, 0, 0.1);
+// }
+
+// .MuiTablePagination-actions {
+//     button {
+//         color     : #1976d2;
+//         transition: all 0.3s ease;
+
+//         &:hover {
+//             background   : rgba(25, 118, 210, 0.1);
+//             border-radius: 5px;
+//         }
+
+//         &:disabled {
+//             color     : #ccc;
+//             background: none;
+//         }
+//     }
+// }
+
+// .MuiSelect-root {
+//     border-radius: 6px;
+//     padding      : 5px;
+// }

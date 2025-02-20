@@ -13,8 +13,16 @@
     margin-bottom: 40px !important;
 }
 
+.search-label {
+    font-weight  : 600;
+    margin-bottom: 10px;
+    display      : block;
+}
+
+
 .search-input {
     margin-bottom: 10px !important;
+
 }
 
 .history-table {
@@ -53,4 +61,12 @@
     display        : flex;
     justify-content: center;
     margin-top     : 10px;
+}
+
+.sorted-asc {
+    color: green;
+}
+
+.sorted-desc {
+    color: red;
 }

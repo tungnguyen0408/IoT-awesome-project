@@ -1,11 +1,5 @@
 import { useState, useEffect, memo } from "react";
-import {
-  Switch,
-  FormControlLabel,
-  Card,
-  CardContent,
-  Box,
-} from "@mui/material";
+import { Switch, Card, CardContent, Box } from "@mui/material";
 import {
   AreaChart,
   Area,
@@ -16,14 +10,16 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { FcComboChart } from "react-icons/fc";
+import { AiOutlineBulb } from "react-icons/ai";
+import { MdAcUnit, MdOpacity } from "react-icons/md";
 import "./homeStyle.scss";
 
 const HomePage = () => {
   const [sensorData, setSensorData] = useState([]);
   const [devices, setDevices] = useState({
-    temperatureDevice: false,
-    humidityDevice: false,
-    lightDevice: false,
+    temperatureDevice: true,
+    humidityDevice: true,
+    lightDevice: true,
   });
 
   useEffect(() => {
@@ -45,6 +41,29 @@ const HomePage = () => {
   const toggleDevice = (device) => {
     setDevices((prev) => ({ ...prev, [device]: !prev[device] }));
   };
+  const deviceList = [
+    {
+      label: "Điều hòa",
+      key: "temperatureDevice",
+      icon: MdAcUnit,
+      nameIcon: "temperature-icon",
+      activeColor: "#03a9f4",
+    },
+    {
+      label: "Quạt",
+      key: "humidityDevice",
+      icon: MdOpacity,
+      nameIcon: "humidity-icon",
+      activeColor: "#4caf50",
+    },
+    {
+      label: "Ánh sáng",
+      key: "lightDevice",
+      icon: AiOutlineBulb,
+      nameIcon: "light-icon",
+      activeColor: "#ffeb3b",
+    },
+  ];
 
   return (
     <div className="homepage">
@@ -123,32 +142,30 @@ const HomePage = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="device-control">
-          <h2>Điều khiển thiết bị</h2>
-          <div className="device-list">
-            {[
-              { label: "Điều hòa", key: "temperatureDevice" },
-              { label: "Máy tạo ẩm", key: "humidityDevice" },
-              { label: "Đèn", key: "lightDevice" },
-            ].map(({ label, key }) => (
+        <div className="device-list">
+          {deviceList.map(
+            ({ label, key, icon: Icon, nameIcon, activeColor }) => (
               <div
                 key={key}
                 className={`device-item ${devices[key] ? "active" : ""}`}
               >
-                <span>{label}</span>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={devices[key]}
-                      onChange={() => toggleDevice(key)}
-                      className="device-switch"
-                    />
-                  }
-                  label={devices[key] ? "Bật" : "Tắt"}
+                <Icon
+                  className={`device-icon ${nameIcon}`}
+                  style={{
+                    color: devices[key] ? activeColor : "#ccc",
+                    transition: "color 0.3s ease-in-out",
+                    fontSize: "2rem",
+                  }}
+                />
+                <span className="device-label">{label}</span>
+                <Switch
+                  checked={devices[key]}
+                  onChange={() => toggleDevice(key)}
+                  className="device-switch"
                 />
               </div>
-            ))}
-          </div>
+            )
+          )}
         </div>
       </div>
     </div>
