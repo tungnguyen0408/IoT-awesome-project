@@ -5,6 +5,8 @@ import MasterLayout from "./pages/users/theme/masterLayout";
 import SensorDataPage from "./pages/users/sensorData/sensorData.js";
 import DeviceHistoryPage from "./pages/users/historyPage/history.js";
 import ProfilePage from "./pages/users/profilePage/profile.js";
+import LoginForm from "pages/users/loginPage/login";
+import RegisterForm from "pages/users/registerPage/register";
 const renderUserRouter = () => {
   const userRouters = [
     {
@@ -22,6 +24,14 @@ const renderUserRouter = () => {
     {
       path: ROUTERS.USER.PROFILE,
       component: <ProfilePage />,
+    },
+    {
+      path: ROUTERS.USER.LOGIN,
+      component: <LoginForm />,
+    },
+    {
+      path: ROUTERS.USER.REGISTER,
+      component: <RegisterForm />,
     },
   ];
 

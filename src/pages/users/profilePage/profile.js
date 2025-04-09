@@ -31,7 +31,7 @@ const ProfilePage = () => {
                   API docs
                 </Link>
                 <Link
-                  to="https://github.com/tungnguyen0408?tab=repositories"
+                  to="https://documenter.getpostman.com/view/33658937/2sAYkErfw5"
                   className="btn btn-outline-dark btn-rounded btn-sm rounded-pill"
                 >
                   PDF file

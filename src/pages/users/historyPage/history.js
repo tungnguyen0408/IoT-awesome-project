@@ -1,4 +1,5 @@
 import { useState, useEffect, memo } from "react";
+import axios from "axios";
 import {
   Table,
   TableBody,
@@ -7,104 +8,96 @@ import {
   TableHead,
   TableRow,
   Paper,
-  TextField,
   TablePagination,
+  TextField,
+  Button,
   TableSortLabel,
 } from "@mui/material";
 import "./historyStyle.scss";
 
 const DeviceHistoryPage = () => {
   const [historyData, setHistoryData] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [sortConfig, setSortConfig] = useState({
-    key: "time",
-    direction: "asc",
-  });
+  const [totalItems, setTotalItems] = useState(0);
+  const [order, setOrder] = useState("asc");
+  const [orderBy, setOrderBy] = useState("time");
 
   useEffect(() => {
-    const generateHistoryData = () => {
-      const daysAgo = [0, 1, 2];
-      const randomDay = daysAgo[Math.floor(Math.random() * daysAgo.length)];
-      const date = new Date();
-      date.setDate(date.getDate() - randomDay);
+    fetchHistoryData();
+  }, [page, rowsPerPage, order, orderBy]);
 
-      return {
-        id: Math.floor(Math.random() * 100),
-        device: `Thiết bị ${Math.floor(Math.random() * 10) + 1}`,
-        action: Math.random() > 0.5 ? "Bật" : "Tắt",
-        time: date.toLocaleString(),
-      };
-    };
+  const fetchHistoryData = async () => {
+    try {
+      let url = `http://localhost:8080/api/v1/get-all-status?page=${page}&size=${rowsPerPage}`;
+      if (searchQuery) {
+        url += `&filter=time&value=${encodeURIComponent(searchQuery)}`;
+      }
 
-    const initialHistory = Array.from({ length: 20 }, generateHistoryData);
-    setHistoryData(initialHistory);
-  }, []);
+      url += `&sort=${orderBy}&order=${order}`;
 
-  const filteredData = historyData.filter(({ time }) =>
-    time.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Xử lý thay đổi trang
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+      const response = await axios.get(url);
+      setHistoryData(response.data.data.data);
+      setTotalItems(response.data.data.meta.total);
+    } catch (error) {
+      console.log("Lỗi khi gọi API", error);
+    }
   };
 
-  // Xử lý thay đổi số dòng mỗi trang
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  const handleRequestSort = () => {
+    const isAsc = order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
   };
-
-  // Xử lý sắp xếp theo thời gian
-  const handleSort = () => {
-    setSortConfig((prev) => ({
-      key: "time",
-      direction: prev.direction === "asc" ? "desc" : "asc",
-    }));
-  };
-
-  const sortedData = [...filteredData].sort((a, b) => {
-    if (a.time < b.time) return sortConfig.direction === "asc" ? -1 : 1;
-    if (a.time > b.time) return sortConfig.direction === "asc" ? 1 : -1;
-    return 0;
-  });
 
   return (
     <div className="container device-history-page">
       <h3>📜 Lịch sử bật/tắt thiết bị</h3>
-      <label htmlFor="search-time" className="search-label">
-        🔍 Tìm kiếm theo thời gian:
-      </label>
-      {/* Ô tìm kiếm */}
-      <TextField
-        label="Tìm kiếm theo thời gian..."
-        variant="outlined"
-        fullWidth
-        className="search-input"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-
+      <div
+        className="search-container"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "5px",
+          marginBottom: "10px",
+        }}
+      >
+        <label style={{ fontWeight: "bold", marginBottom: "10px" }}>
+          Tìm theo thời gian
+        </label>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <TextField
+            label="Nhập thời gian tìm kiếm"
+            variant="outlined"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-bar"
+            style={{ flex: 2.5, marginRight: "10px" }}
+            InputProps={{ style: { height: "56px" } }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={fetchHistoryData}
+            style={{ height: "56px", minWidth: "120px" }}
+          >
+            Tìm kiếm
+          </Button>
+        </div>
+      </div>
       <TableContainer component={Paper} className="history-table">
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
               <TableCell>Thiết bị</TableCell>
-              <TableCell>Hành động</TableCell>
+              <TableCell>Trạng thái</TableCell>
               <TableCell>
                 <TableSortLabel
-                  active={true}
-                  direction={sortConfig.direction}
-                  onClick={handleSort}
-                  sx={{
-                    color: "white !important",
-                    "& .MuiTableSortLabel-icon": {
-                      color: "white !important",
-                    },
-                  }}
+                  active={orderBy === "time"}
+                  direction={order}
+                  onClick={handleRequestSort}
+                  sx={{ color: "white", "&.Mui-active": { color: "white" } }}
                 >
                   Thời gian
                 </TableSortLabel>
@@ -112,41 +105,29 @@ const DeviceHistoryPage = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedData
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map(({ id, device, action, time }) => (
-                <TableRow key={id}>
-                  <TableCell>{id}</TableCell>
-                  <TableCell>{device}</TableCell>
-                  <TableCell>{action}</TableCell>
-                  <TableCell>{time}</TableCell>
-                </TableRow>
-              ))}
+            {historyData.map(({ id, device, status, time }) => (
+              <TableRow key={id}>
+                <TableCell>{id}</TableCell>
+                <TableCell>{device}</TableCell>
+                <TableCell>{status ? "Bật" : "Tắt"}</TableCell>
+                <TableCell>{time}</TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
-
-      {/* Phân trang */}
       <TablePagination
         component="div"
-        count={filteredData.length}
-        rowsPerPage={rowsPerPage}
+        count={totalItems}
         page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[5, 10, 15, 20]}
-        labelRowsPerPage="Số hàng mỗi trang"
-        sx={{
-          "& .MuiTablePagination-selectLabel": {
-            color: "#1976d2",
-            fontWeight: "bold",
-          },
-          "& .MuiSelect-select": {
-            color: "#1976d2",
-            fontWeight: "bold",
-          },
-          "& .MuiOutlinedInput-root": { color: "red" },
+        onPageChange={(_, newPage) => setPage(newPage)}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(event) => {
+          setRowsPerPage(parseInt(event.target.value, 10));
+          setPage(0);
         }}
+        rowsPerPageOptions={[5, 10, 20, 50]}
+        labelRowsPerPage="Số hàng mỗi trang"
       />
     </div>
   );

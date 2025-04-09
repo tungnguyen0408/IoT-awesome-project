@@ -1,4 +1,5 @@
 import { useState, useEffect, memo } from "react";
+import axios from "axios";
 import {
   Table,
   TableBody,
@@ -12,6 +13,7 @@ import {
   TableSortLabel,
   MenuItem,
   Select,
+  Button,
 } from "@mui/material";
 import "./sensorStyle.scss";
 
@@ -21,84 +23,51 @@ const SensorDataPage = () => {
   const [searchField, setSearchField] = useState("all");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [sortConfig, setSortConfig] = useState({
-    key: "time",
-    direction: "asc",
-  });
+  const [totalItems, setTotalItems] = useState(0);
+  const [order, setOrder] = useState("asc");
+  const [orderBy, setOrderBy] = useState("");
 
   useEffect(() => {
-    const generateRandomData = () => {
-      const daysAgo = [0, 1, 2];
-      const randomDay = daysAgo[Math.floor(Math.random() * daysAgo.length)];
-      const date = new Date();
-      date.setDate(date.getDate() - randomDay);
+    fetchSensorData();
+  }, [page, rowsPerPage, order, orderBy]);
 
-      return {
-        id: Math.floor(Math.random() * 1000),
-        time: date.toLocaleString(),
-        temperature: (Math.random() * 10 + 20).toFixed(1),
-        humidity: (Math.random() * 30 + 40).toFixed(1),
-        light: (Math.random() * 300 + 200).toFixed(1),
-      };
-    };
+  const fetchSensorData = async () => {
+    try {
+      let url = `http://localhost:8080/api/v1/get-all-data?page=${page}&size=${rowsPerPage}`;
 
-    const initialData = Array.from({ length: 50 }, generateRandomData);
-    setSensorData(initialData);
-  }, []);
+      // Áp dụng tìm kiếm nếu có
+      if (searchField !== "all" && searchQuery) {
+        url += `&filter=${searchField}&value=${encodeURIComponent(
+          searchQuery
+        )}`;
+      }
+
+      // Áp dụng sắp xếp nếu có
+      if (orderBy) {
+        url += `&sort=${orderBy}&order=${order}`;
+      }
+
+      const response = await axios.get(url);
+      setSensorData(response.data.data.data);
+      setTotalItems(response.data.data.meta.total);
+    } catch (error) {
+      console.log("Lỗi khi gọi API", error);
+    }
+  };
 
   const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value.toLowerCase());
-    setPage(0);
+    setSearchQuery(event.target.value);
   };
 
   const handleSearchFieldChange = (event) => {
     setSearchField(event.target.value);
   };
 
-  const filteredData = sensorData.filter((item) => {
-    const value = searchQuery.toLowerCase();
-    if (!value) return true;
-    switch (searchField) {
-      case "time":
-        return item.time.toLowerCase().includes(value);
-      case "temperature":
-        return item.temperature.toString().includes(value);
-      case "humidity":
-        return item.humidity.toString().includes(value);
-      case "light":
-        return item.light.toString().includes(value);
-      default:
-        return (
-          item.time.toLowerCase().includes(value) ||
-          item.temperature.toString().includes(value) ||
-          item.humidity.toString().includes(value) ||
-          item.light.toString().includes(value)
-        );
-    }
-  });
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(property);
   };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const handleSort = (key) => {
-    setSortConfig((prev) => ({
-      key,
-      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
-    }));
-  };
-
-  const sortedData = [...filteredData].sort((a, b) => {
-    const { key, direction } = sortConfig;
-    if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
-    if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
-    return 0;
-  });
 
   return (
     <div className="container sensor-data-page">
@@ -116,7 +85,7 @@ const SensorDataPage = () => {
           value={searchField}
           onChange={handleSearchFieldChange}
           className="search-dropdown"
-          style={{ width: "115px" }}
+          style={{ width: "115px", marginRight: "10px" }}
         >
           <MenuItem value="all">Tất cả</MenuItem>
           <MenuItem value="time">Thời gian</MenuItem>
@@ -124,72 +93,64 @@ const SensorDataPage = () => {
           <MenuItem value="humidity">Độ ẩm</MenuItem>
           <MenuItem value="light">Ánh sáng</MenuItem>
         </Select>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={fetchSensorData}
+          style={{ height: "56px" }}
+        >
+          Tìm kiếm
+        </Button>
       </div>
+
       <TableContainer component={Paper} className="sensor-table">
         <Table>
           <TableHead>
             <TableRow>
               {[
-                { key: "id", label: "ID" },
-                { key: "temperature", label: "Nhiệt độ (°C)" },
-                { key: "humidity", label: "Độ ẩm (%)" },
-                { key: "light", label: "Ánh sáng (lux)" },
-                { key: "time", label: "Thời gian" },
-              ].map(({ key, label }) => (
-                <TableCell key={key}>
+                { id: "id", label: "ID" },
+                { id: "temperature", label: "Nhiệt độ (°C)" },
+                { id: "humidity", label: "Độ ẩm (%)" },
+                { id: "light", label: "Ánh sáng (lux)" },
+                { id: "time", label: "Thời gian" },
+              ].map((column) => (
+                <TableCell key={column.id}>
                   <TableSortLabel
-                    active={sortConfig.key === key}
-                    direction={sortConfig.direction}
-                    onClick={() => handleSort(key)}
-                    sx={{
-                      color: "white !important",
-                      "& .MuiTableSortLabel-icon": {
-                        color: "white !important",
-                      },
-                    }}
+                    active={orderBy === column.id}
+                    direction={orderBy === column.id ? order : "asc"}
+                    onClick={() => handleRequestSort(column.id)}
                   >
-                    {label}
+                    {column.label}
                   </TableSortLabel>
                 </TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedData
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map(({ id, time, temperature, humidity, light }) => (
-                <TableRow key={id}>
-                  <TableCell>{id}</TableCell>
-
-                  <TableCell>{temperature}</TableCell>
-                  <TableCell>{humidity}</TableCell>
-                  <TableCell>{light}</TableCell>
-                  <TableCell>{time}</TableCell>
-                </TableRow>
-              ))}
+            {sensorData.map(({ id, time, temperature, humidity, light }) => (
+              <TableRow key={id}>
+                <TableCell>{id}</TableCell>
+                <TableCell>{temperature}</TableCell>
+                <TableCell>{humidity}</TableCell>
+                <TableCell>{light}</TableCell>
+                <TableCell>{time}</TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
         component="div"
-        count={filteredData.length}
+        count={totalItems}
         page={page}
-        onPageChange={handleChangePage}
+        onPageChange={(_, newPage) => setPage(newPage)}
         rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
+        onRowsPerPageChange={(event) => {
+          setRowsPerPage(parseInt(event.target.value, 10));
+          setPage(0);
+        }}
         rowsPerPageOptions={[5, 10, 20, 50]}
         labelRowsPerPage="Số hàng mỗi trang"
-        sx={{
-          "& .MuiTablePagination-selectLabel": {
-            color: "#1976d2",
-            fontWeight: "bold",
-          },
-          "& .MuiSelect-select": {
-            color: "#1976d2",
-            fontWeight: "bold",
-          },
-          "& .MuiOutlinedInput-root": { color: "red" },
-        }}
       />
     </div>
   );

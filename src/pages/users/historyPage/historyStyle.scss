@@ -70,3 +70,12 @@
 .sorted-desc {
     color: red;
 }
+
+.MuiTableSortLabel-root {
+    color: white !important;
+    /* Hoặc chọn màu phù hợp */
+}
+
+.MuiTableSortLabel-root.Mui-active {
+    color: white !important;
+}
