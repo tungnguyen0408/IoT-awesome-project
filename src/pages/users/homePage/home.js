@@ -1,5 +1,4 @@
 import { useState, useEffect, memo } from "react";
-import axios from "axios";
 import { Switch, Card, CardContent, Box } from "@mui/material";
 import {
   AreaChart,
@@ -9,6 +8,8 @@ import {
   Tooltip,
   CartesianGrid,
   ResponsiveContainer,
+  Legend,
+  ComposedChart,
 } from "recharts";
 import { FcComboChart } from "react-icons/fc";
 import { AiOutlineBulb } from "react-icons/ai";
@@ -18,8 +19,6 @@ import { Client } from "@stomp/stompjs";
 import "./homeStyle.scss";
 
 const socketUrl = "http://localhost:8080/ws";
-const API_LATEST = "http://localhost:8080/api/v1/get-top-data";
-const API_HISTORY = "http://localhost:8080/api/v1/get-top-ten?quantity=10";
 
 const HomePage = () => {
   const [sensorData, setSensorData] = useState([]);
@@ -38,47 +37,17 @@ const HomePage = () => {
         stompClient.subscribe("/topic/sensor", (message) => {
           const parsed = JSON.parse(message.body);
           console.log("Received from socket:", parsed);
-          setLatestData(parsed); // cập nhật giá trị mới nhất
+          parsed.time = new Date().toLocaleTimeString(); // Gắn time cho biểu đồ
+          setLatestData(parsed);
           setSensorData((prev) => [...prev.slice(-9), parsed]);
         });
       },
     });
 
     stompClient.activate();
-
     return () => {
       stompClient.deactivate();
     };
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [latestRes, historyRes] = await Promise.all([
-          axios.get(API_LATEST),
-          axios.get(API_HISTORY),
-        ]);
-
-        if (latestRes.data.statusCode === 200) {
-          setLatestData(latestRes.data.data);
-        }
-
-        if (historyRes.data.statusCode === 200) {
-          const formattedData = historyRes.data.data.map((item) => ({
-            ...item,
-            time: new Date(item.time).toLocaleTimeString(),
-          }));
-          setSensorData(formattedData);
-        }
-      } catch (error) {
-        console.error("Lỗi khi lấy dữ liệu:", error);
-      }
-    };
-
-    fetchData();
-    const interval = setInterval(fetchData, 5000);
-
-    return () => clearInterval(interval);
   }, []);
 
   const toggleDevice = (device) => {
@@ -108,15 +77,8 @@ const HomePage = () => {
       activeColor: "#ffeb3b",
     },
     {
-      label: "Ánh sáng",
-      key: "lightDevice",
-      icon: AiOutlineBulb,
-      nameIcon: "light-icon",
-      activeColor: "#ffeb3b",
-    },
-    {
-      label: "Ánh sáng",
-      key: "lightDevice",
+      label: "Thiết bị khác",
+      key: "otherDevice",
       icon: AiOutlineBulb,
       nameIcon: "light-icon",
       activeColor: "#ffeb3b",
@@ -124,6 +86,7 @@ const HomePage = () => {
   ];
   const column1 = deviceList.slice(0, 3);
   const column2 = deviceList.slice(3);
+
   return (
     <div className="homepage">
       <div className="sensor-info">
@@ -175,7 +138,6 @@ const HomePage = () => {
                 dataKey="temperature"
                 stroke="#ff7300"
                 fill="url(#colorTemp)"
-                fillOpacity={1}
                 name="Nhiệt độ"
               />
               <Area
@@ -183,7 +145,6 @@ const HomePage = () => {
                 dataKey="humidity"
                 stroke="#0088FE"
                 fill="url(#colorHumidity)"
-                fillOpacity={1}
                 name="Độ ẩm"
               />
               <Area
@@ -191,38 +152,11 @@ const HomePage = () => {
                 dataKey="light"
                 stroke="#00C49F"
                 fill="url(#colorLight)"
-                fillOpacity={1}
                 name="Ánh sáng"
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
-
-        {/* <div className="device-list">
-          {deviceList.map(
-            ({ label, key, icon: Icon, nameIcon, activeColor }) => (
-              <div
-                key={key}
-                className={`device-item ${devices[key] ? "active" : ""}`}
-              >
-                <Icon
-                  className={`device-icon ${nameIcon}`}
-                  style={{
-                    color: devices[key] ? activeColor : "#ccc",
-                    transition: "color 0.3s ease-in-out",
-                    fontSize: "2rem",
-                  }}
-                />
-                <span className="device-label">{label}</span>
-                <Switch
-                  checked={devices[key]}
-                  onChange={() => toggleDevice(key)}
-                  className="device-switch"
-                />
-              </div>
-            )
-          )}
-        </div> */}
         <div className="device-list-columns">
           {[column1, column2].map((column, colIndex) => (
             <div className="device-column" key={colIndex}>

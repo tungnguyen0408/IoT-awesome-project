@@ -133,50 +133,5 @@
     }
 
 
-    // .device-item {
-    //     display       : flex;
-    //     flex-direction: column;
-    //     align-items   : center;
-    //     background    : white;
-    //     padding       : 12px;
-    //     border-radius : 12px;
-    //     box-shadow    : 0 3px 6px rgba(0, 0, 0, 0.1);
-    //     transition    : transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    //     width         : 100%;
-    //     width         : 160px;
-    //     min-height    : 90px;
-
-    //     &.active {
-    //         background    : #e3f2fd;
-    //         box-shadow    : 0 5px 10px rgba(0, 0, 0, 0.15);
-    //         --active-color: #4caf50;
-    //     }
-
-    //     &:hover {
-    //         transform : scale(1.05);
-    //         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    //     }
-
-    //     span {
-    //         font-size    : 15px;
-    //         font-weight  : 600;
-    //         margin-bottom: 5px;
-    //     }
-
-    //     .device-icon {
-    //         font-size : 30px;
-    //         transition: color 0.3s ease-in-out, transform 0.2s ease-in-out;
-    //         color     : #777; // Mặc định màu xám
-    //     }
-
-    //     .device-switch {
-    //         scale          : 1.3;
-    //         transform      : scale(0.9);
-    //         display        : flex;
-    //         justify-content: center;
-    //         align-items    : center;
-    //     }
-
-    // }
 
 }
