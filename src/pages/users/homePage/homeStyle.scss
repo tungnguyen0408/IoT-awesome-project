@@ -47,6 +47,32 @@
         height         : 400px;
         flex-direction : column;
 
+
+        /* homeStyle.scss */
+
+        .charts-row {
+            display        : flex;
+            justify-content: space-between;
+            gap            : 20px;
+            /* Khoảng cách giữa các biểu đồ */
+        }
+
+        .chart-column {
+            flex  : 1;
+            /* Mỗi biểu đồ chiếm 1 phần không gian */
+            margin: 10px;
+            /* Đảm bảo có khoảng cách giữa các biểu đồ */
+        }
+
+        .chart-column-left {
+            flex: 1;
+        }
+
+        .chart-column-right {
+            flex: 1;
+        }
+
+
     }
 
     .device-control {
@@ -116,7 +142,7 @@
         .device-icon {
             font-size : 30px;
             transition: color 0.3s ease-in-out, transform 0.2s ease-in-out;
-            color     : #777; // Mặc định màu xám
+            color     : #777;
         }
 
         .device-label {
@@ -134,4 +160,27 @@
 
 
 
+}
+
+.device-count {
+    margin-top: 4px;
+    font-size : 0.85rem;
+    color     : #666;
+}
+
+
+@keyframes flash-color {
+
+    0%,
+    100% {
+        background-color: transparent;
+    }
+
+    50% {
+        background-color: #ffe082;
+    }
+}
+
+.device-item.flashing {
+    animation: flash-color 1s infinite;
 }
