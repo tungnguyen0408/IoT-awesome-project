@@ -26,23 +26,22 @@ const SensorDataPage = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     fetchSensorData();
   }, [page, rowsPerPage, order, orderBy]);
 
-  const fetchSensorData = async () => {
+  const fetchSensorData = async (customPage = page) => {
     try {
-      let url = `http://localhost:8080/api/v1/get-all-data?page=${page}&size=${rowsPerPage}`;
+      let url = `http://localhost:8080/api/v1/get-all-data?page=${customPage}&size=${rowsPerPage}`;
 
-      // Áp dụng tìm kiếm nếu có
       if (searchField !== "all" && searchQuery) {
         url += `&filter=${searchField}&value=${encodeURIComponent(
           searchQuery
         )}`;
       }
 
-      // Áp dụng sắp xếp nếu có
       if (orderBy) {
         url += `&sort=${orderBy}&order=${order}`;
       }
@@ -50,8 +49,15 @@ const SensorDataPage = () => {
       const response = await axios.get(url);
       setSensorData(response.data.data.data);
       setTotalItems(response.data.data.meta.total);
+      setErrorMessage("");
     } catch (error) {
       console.log("Lỗi khi gọi API", error);
+      if (error.response && error.response.status === 400) {
+        setErrorMessage(error.response.data.message || "Dữ liệu không hợp lệ.");
+      } else {
+        setErrorMessage("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+      }
+      setSensorData([]);
     }
   };
 
@@ -96,12 +102,20 @@ const SensorDataPage = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={fetchSensorData}
+          onClick={() => {
+            setPage(0);
+            fetchSensorData(0); // truyền page mới vào
+          }}
           style={{ height: "56px" }}
         >
           Tìm kiếm
         </Button>
       </div>
+      {errorMessage && (
+        <div className="error-message" style={{ color: "red", marginTop: 8 }}>
+          {errorMessage}
+        </div>
+      )}
 
       <TableContainer component={Paper} className="sensor-table">
         <Table>

@@ -2,9 +2,9 @@ import { useState, useEffect, memo } from "react";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import axios from "axios"; // 👉 Thêm dòng này
-import SensorCards from "component/SensorCards";
-import DeviceControl from "component/DeviceControl";
-import SensorChart from "component/SensorChart";
+import SensorCards from "component/homepageComponent/SensorCards";
+import DeviceControl from "component/homepageComponent/DeviceControl";
+import SensorChart from "component/homepageComponent/SensorChart";
 import "./homeStyle.scss";
 
 const socketUrl = "http://localhost:8080/ws";
