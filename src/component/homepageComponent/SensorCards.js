@@ -7,7 +7,6 @@ const SensorCards = ({ sensorData }) => {
     { label: "💧 Độ ẩm", key: "humidity", unit: "%" },
     { label: "💡 Ánh sáng", key: "light", unit: "lux" },
     { label: "💨 Tốc độ gió", key: "wind", unit: "m/s" },
-    { label: "🌫️ Bụi", key: "dust", unit: "µg/m³" },
   ];
   const latestData = sensorData[sensorData.length - 1];
 
@@ -19,7 +18,10 @@ const SensorCards = ({ sensorData }) => {
             <Box className="sensor-box">
               <h3>{label}</h3>
               <p>
-                {latestData ? latestData[key] : "--"} {unit}
+                {latestData && latestData[key] !== undefined
+                  ? latestData[key]
+                  : "--"}{" "}
+                {unit}
               </p>
             </Box>
           </CardContent>

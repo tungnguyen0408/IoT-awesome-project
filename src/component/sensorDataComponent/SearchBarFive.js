@@ -16,7 +16,7 @@ const SearchBarFive = ({
         onChange={onSearchChange}
         className="search-bar"
         style={{ flex: 2.5, marginRight: "10px" }}
-        helperText="Bạn có thể tìm kiếm theo thời gian, nhiệt độ, độ ẩm, ánh sáng, bụi hoặc gió"
+        helperText="Bạn có thể tìm kiếm theo thời gian, nhiệt độ, độ ẩm, ánh sáng hoặc gió"
       />
       <Select
         value={searchField}
@@ -29,8 +29,7 @@ const SearchBarFive = ({
         <MenuItem value="temperature">Nhiệt độ</MenuItem>
         <MenuItem value="humidity">Độ ẩm</MenuItem>
         <MenuItem value="light">Ánh sáng</MenuItem>
-        <MenuItem value="dust">Bụi (µg/m³)</MenuItem> {/* Thêm dust */}
-        <MenuItem value="wind">Gió (km/h)</MenuItem> {/* Thêm wind */}
+        <MenuItem value="wind">Gió (km/h)</MenuItem>
       </Select>
       <Button
         variant="contained"

@@ -15,7 +15,6 @@ const SensorTableFive = ({ data, orderBy, order, onRequestSort }) => {
     { id: "temperature", label: "Nhiệt độ (°C)" },
     { id: "humidity", label: "Độ ẩm (%)" },
     { id: "light", label: "Ánh sáng (lux)" },
-    { id: "dust", label: "Bụi (µg/m³)" },
     { id: "wind", label: "Gió (km/h)" },
     { id: "time", label: "Thời gian" },
   ];
@@ -39,19 +38,16 @@ const SensorTableFive = ({ data, orderBy, order, onRequestSort }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map(
-            ({ id, time, temperature, humidity, light, dust, wind }) => (
-              <TableRow key={id}>
-                <TableCell>{id}</TableCell>
-                <TableCell>{temperature}</TableCell>
-                <TableCell>{humidity}</TableCell>
-                <TableCell>{light}</TableCell>
-                <TableCell>{dust}</TableCell> {/* Thêm cột dust */}
-                <TableCell>{wind}</TableCell> {/* Thêm cột wind */}
-                <TableCell>{time}</TableCell>
-              </TableRow>
-            )
-          )}
+          {data.map(({ id, time, temperature, humidity, light, wind }) => (
+            <TableRow key={id}>
+              <TableCell>{id}</TableCell>
+              <TableCell>{temperature}</TableCell>
+              <TableCell>{humidity}</TableCell>
+              <TableCell>{light}</TableCell>
+              <TableCell>{wind}</TableCell>
+              <TableCell>{time}</TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </TableContainer>

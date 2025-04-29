@@ -12,60 +12,57 @@ import {
   TextField,
   Button,
   TableSortLabel,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 import "./historyStyle.scss";
 
 const HistoryPage = () => {
   const [historyData, setHistoryData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState({
-    device: "",
-    status: "",
-    time: "",
-  });
+  const [filterType, setFilterType] = useState(""); // "device", "status", "time"
+  const [filterValue, setFilterValue] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalItems, setTotalItems] = useState(0);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("time");
 
-  // Fetch history data, triggered only when search button is clicked
+  useEffect(() => {
+    fetchHistoryData();
+  }, [page, rowsPerPage, order, orderBy]);
+
   const fetchHistoryData = async () => {
     try {
       let url = `http://localhost:8080/api/v1/all_status?page=${page}&size=${rowsPerPage}`;
 
-      // Create dynamic filter parameters
-      if (searchQuery.device) {
-        url += `&filter=device&value=${encodeURIComponent(searchQuery.device)}`;
-      }
-      if (searchQuery.status !== "") {
-        const statusValue =
-          searchQuery.status === "Bật"
-            ? "true"
-            : searchQuery.status === "Tắt"
-            ? "false"
-            : "";
-        if (statusValue) {
-          url += `&filter=status&value=${encodeURIComponent(statusValue)}`;
+      if (filterType && filterValue) {
+        let value = filterValue;
+        if (filterType === "status") {
+          value =
+            value.toLowerCase() === "bật"
+              ? "true"
+              : value.toLowerCase() === "tắt"
+              ? "false"
+              : "";
         }
-      }
-      if (searchQuery.time) {
-        url += `&filter=time&value=${encodeURIComponent(searchQuery.time)}`;
+        url += `&filter=${filterType}&value=${encodeURIComponent(value)}`;
       }
 
       url += `&sort=${orderBy}&order=${order}`;
 
       const response = await axios.get(url);
-
       const { data } = response.data;
       if (data && Array.isArray(data.data)) {
         setHistoryData(data.data);
         setTotalItems(data.meta?.total || 0);
       } else {
-        setHistoryData([]); // If data is invalid, set empty array
+        setHistoryData([]);
       }
     } catch (error) {
       console.log("Lỗi khi gọi API", error);
-      setHistoryData([]); // Fallback in case of error
+      setHistoryData([]);
     }
   };
 
@@ -82,57 +79,48 @@ const HistoryPage = () => {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "5px",
-          marginBottom: "10px",
+          gap: "10px",
+          marginBottom: "15px",
         }}
       >
-        <label style={{ fontWeight: "bold", marginBottom: "10px" }}>
-          Tìm kiếm theo thiết bị, trạng thái và thời gian
-        </label>
+        <label style={{ fontWeight: "bold" }}>Tìm kiếm theo:</label>
         <div style={{ display: "flex", gap: "10px" }}>
+          <FormControl style={{ width: "200px" }}>
+            <InputLabel>Lọc theo</InputLabel>
+            <Select
+              value={filterType}
+              label="Lọc theo"
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <MenuItem value="">Tất cả</MenuItem>
+              <MenuItem value="device">Thiết bị</MenuItem>
+              <MenuItem value="status">Trạng thái</MenuItem>
+              <MenuItem value="time">Thời gian</MenuItem>
+            </Select>
+          </FormControl>
+
           <TextField
-            label="Thiết bị"
+            label="Từ khóa"
             variant="outlined"
-            value={searchQuery.device}
-            onChange={(e) =>
-              setSearchQuery({ ...searchQuery, device: e.target.value })
-            }
-            className="search-bar"
-            style={{ flex: 1, marginRight: "10px" }}
-            InputProps={{ style: { height: "56px" } }}
+            value={filterValue}
+            onChange={(e) => setFilterValue(e.target.value)}
+            style={{ flex: 1 }}
           />
-          <TextField
-            label="Trạng thái (Bật/Tắt)"
-            variant="outlined"
-            value={searchQuery.status}
-            onChange={(e) =>
-              setSearchQuery({ ...searchQuery, status: e.target.value })
-            }
-            className="search-bar"
-            style={{ flex: 1, marginRight: "10px" }}
-            InputProps={{ style: { height: "56px" } }}
-          />
-          <TextField
-            label="Thời gian"
-            variant="outlined"
-            value={searchQuery.time}
-            onChange={(e) =>
-              setSearchQuery({ ...searchQuery, time: e.target.value })
-            }
-            className="search-bar"
-            style={{ flex: 2.5, marginRight: "10px" }}
-            InputProps={{ style: { height: "56px" } }}
-          />
+
           <Button
             variant="contained"
             color="primary"
-            onClick={fetchHistoryData} // Trigger data fetch here
+            onClick={() => {
+              setPage(0);
+              fetchHistoryData();
+            }}
             style={{ height: "56px", minWidth: "120px" }}
           >
             Tìm kiếm
           </Button>
         </div>
       </div>
+
       <TableContainer component={Paper} className="history-table">
         <Table>
           <TableHead>
@@ -172,6 +160,7 @@ const HistoryPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
       <TablePagination
         component="div"
         count={totalItems}

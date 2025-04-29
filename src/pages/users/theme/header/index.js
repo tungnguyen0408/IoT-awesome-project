@@ -11,11 +11,11 @@ const Header = () => {
     },
     {
       name: "Dữ liệu cảm biến",
-      path: ROUTERS.USER.SENSORDATA,
+      path: ROUTERS.USER.SENSORDATAPAGEFIVE,
     },
     {
       name: "Lịch sử bật/tắt",
-      path: ROUTERS.USER.HISTORY,
+      path: ROUTERS.USER.HISTORYPAGE,
     },
   ]);
   const [activeIndex, setActiveIndex] = useState(0);

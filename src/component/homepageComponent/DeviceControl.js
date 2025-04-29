@@ -93,13 +93,13 @@ const DeviceControl = ({ flashOther }) => {
       interval = setInterval(() => {
         setDevices((prev) => ({
           ...prev,
-          lightDevice: !prev.lightDevice,
+          otherDevice: !prev.otherDevice, // đổi từ lightDevice → otherDevice
         }));
       }, 500);
     } else {
       setDevices((prev) => ({
         ...prev,
-        lightDevice: false,
+        otherDevice: false, // đổi từ lightDevice → otherDevice
       }));
     }
 
@@ -148,7 +148,7 @@ const DeviceControl = ({ flashOther }) => {
             <div
               key={key}
               className={`device-item ${devices[key] ? "active" : ""} ${
-                flashOther && key === "lightDevice" ? "flashing" : ""
+                flashOther && key === "otherDevice" ? "flashing" : ""
               }`}
             >
               <Icon

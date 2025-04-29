@@ -8,7 +8,7 @@ import "./sensorStyle.scss";
 const SensorDataPageFive = () => {
   const [sensorData, setSensorData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchField, setSearchField] = useState("all"); // all, time, wind, humidity, light, dust
+  const [searchField, setSearchField] = useState("all");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalItems, setTotalItems] = useState(0);
@@ -18,13 +18,12 @@ const SensorDataPageFive = () => {
 
   useEffect(() => {
     fetchSensorData();
-  }, [page, rowsPerPage, order, orderBy, searchQuery, searchField]);
+  }, [page, rowsPerPage, order, orderBy]);
 
   const fetchSensorData = async (customPage = page) => {
     try {
       let url = `http://localhost:8080/api/v1/all?page=${customPage}&size=${rowsPerPage}`;
 
-      // Kiểm tra nếu đang tìm kiếm theo một trường cụ thể
       if (searchField !== "all" && searchQuery) {
         url += `&filter=${searchField}&value=${encodeURIComponent(
           searchQuery
@@ -35,7 +34,6 @@ const SensorDataPageFive = () => {
         url += `&sort=${orderBy}&order=${order}`;
       }
 
-      // Gọi API
       const response = await axios.get(url);
       setSensorData(response.data.data.data);
       setTotalItems(response.data.data.meta.total);
@@ -67,7 +65,7 @@ const SensorDataPageFive = () => {
         onSearchFieldChange={(e) => setSearchField(e.target.value)}
         onSearchClick={() => {
           setPage(0);
-          fetchSensorData(0);
+          fetchSensorData(0); // ✅ Gọi API khi bấm nút tìm kiếm
         }}
       />
       {errorMessage && (
@@ -85,10 +83,15 @@ const SensorDataPageFive = () => {
         totalItems={totalItems}
         page={page}
         rowsPerPage={rowsPerPage}
-        onPageChange={(_, newPage) => setPage(newPage)}
+        onPageChange={(_, newPage) => {
+          setPage(newPage);
+          fetchSensorData(newPage);
+        }}
         onRowsPerPageChange={(event) => {
-          setRowsPerPage(parseInt(event.target.value, 10));
+          const newSize = parseInt(event.target.value, 10);
+          setRowsPerPage(newSize);
           setPage(0);
+          fetchSensorData(0);
         }}
       />
     </div>
