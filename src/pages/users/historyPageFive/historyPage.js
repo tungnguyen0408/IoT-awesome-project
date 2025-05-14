@@ -83,8 +83,15 @@ const HistoryPage = () => {
           marginBottom: "15px",
         }}
       >
-        <label style={{ fontWeight: "bold" }}>Tìm kiếm theo:</label>
+        <label style={{ fontWeight: "bold" }}>Nhập từ khóa tìm kiếm:</label>
         <div style={{ display: "flex", gap: "10px" }}>
+          <TextField
+            label="Từ khóa"
+            variant="outlined"
+            value={filterValue}
+            onChange={(e) => setFilterValue(e.target.value)}
+            style={{ flex: 1, maxWidth: "400px" }}
+          />
           <FormControl style={{ width: "200px" }}>
             <InputLabel>Lọc theo</InputLabel>
             <Select
@@ -98,14 +105,6 @@ const HistoryPage = () => {
               <MenuItem value="time">Thời gian</MenuItem>
             </Select>
           </FormControl>
-
-          <TextField
-            label="Từ khóa"
-            variant="outlined"
-            value={filterValue}
-            onChange={(e) => setFilterValue(e.target.value)}
-            style={{ flex: 1 }}
-          />
 
           <Button
             variant="contained"

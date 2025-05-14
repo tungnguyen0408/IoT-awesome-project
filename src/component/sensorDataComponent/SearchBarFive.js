@@ -29,7 +29,7 @@ const SearchBarFive = ({
         <MenuItem value="temperature">Nhiệt độ</MenuItem>
         <MenuItem value="humidity">Độ ẩm</MenuItem>
         <MenuItem value="light">Ánh sáng</MenuItem>
-        <MenuItem value="wind">Gió (km/h)</MenuItem>
+        <MenuItem value="wind">Gió (m/s)</MenuItem>
       </Select>
       <Button
         variant="contained"

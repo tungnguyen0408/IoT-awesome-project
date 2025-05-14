@@ -65,7 +65,7 @@ const SensorDataPageFive = () => {
         onSearchFieldChange={(e) => setSearchField(e.target.value)}
         onSearchClick={() => {
           setPage(0);
-          fetchSensorData(0); // ✅ Gọi API khi bấm nút tìm kiếm
+          fetchSensorData(0);
         }}
       />
       {errorMessage && (

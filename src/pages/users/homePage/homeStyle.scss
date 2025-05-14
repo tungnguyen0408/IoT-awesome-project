@@ -20,13 +20,14 @@
         flex-wrap      : wrap;
 
         .sensor-card {
-            width        : 220px;
+            width        : 240px;
             text-align   : center;
             background   : white;
             padding      : 18px;
             border-radius: 12px;
             box-shadow   : 0 4px 8px rgba(0, 0, 0, 0.1);
             transition   : transform 0.2s ease-in-out;
+            height       : 140px;
 
             &:hover {
                 transform : translateY(-3px);
@@ -121,6 +122,13 @@
         text-align      : center;
         background-color: #fff;
         width           : 150px;
+
+        .placeholder-switch {
+            min-height     : 80px;
+            display        : flex;
+            align-items    : center;
+            justify-content: center;
+        }
 
         &.active {
             background    : #e3f2fd;

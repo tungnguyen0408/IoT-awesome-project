@@ -23,7 +23,7 @@ const SensorChart = ({ sensorData }) => {
     >
       <h2>
         <FcComboChart size={50} />
-        Biểu đồ hiển thị cảm bị
+        Biểu đồ hiển thị cảm biến
       </h2>
       <ResponsiveContainer width="100%" height={400}>
         <AreaChart data={sensorData}>

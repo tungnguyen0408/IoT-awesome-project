@@ -1,110 +1,143 @@
 import React, { useState, useEffect } from "react";
 import { Switch, CircularProgress } from "@mui/material";
 import { AiOutlineBulb } from "react-icons/ai";
-import { MdAcUnit, MdOpacity } from "react-icons/md";
+import { MdAcUnit, MdOpacity, MdOutlineWarning } from "react-icons/md";
 import axios from "axios";
+const DeviceControl = ({ blinkState, windSpeedState, statusMessage }) => {
+  const [devices, setDevices] = useState({
+    temperatureDevice: false,
+    humidityDevice: false,
+    lightDevice: false,
+  });
 
-const DeviceControl = ({ flashOther }) => {
-  const [devices, setDevices] = useState(() => {
-    const saved = localStorage.getItem("deviceStates");
-    return saved
-      ? JSON.parse(saved)
-      : {
+  const [loading, setLoading] = useState({
+    temperatureDevice: false,
+    humidityDevice: false,
+    lightDevice: false,
+    otherDevice: false,
+  });
+
+  const [deviceCount, setDeviceCount] = useState({});
+  useEffect(() => {
+    const fetchDeviceStatus = async () => {
+      try {
+        // Lấy trạng thái thiết bị
+        const response = await axios.get(
+          "http://localhost:8080/api/v1/latest-status"
+        );
+
+        const fetchedDevices = {
           temperatureDevice: false,
           humidityDevice: false,
           lightDevice: false,
-          otherDevice: false,
         };
-  });
 
-  useEffect(() => {
-    localStorage.setItem("deviceStates", JSON.stringify(devices));
-  }, [devices]);
+        response.data.data.forEach((item) => {
+          if (item.device in fetchedDevices) {
+            fetchedDevices[item.device] = item.status;
+          }
+        });
 
-  const [loading, setLoading] = useState({});
-  const [isSuccess, setIsSuccess] = useState({});
-  const [deviceCount, setDeviceCount] = useState({});
+        setDevices(fetchedDevices);
 
-  useEffect(() => {
-    const fetchAllDeviceCounts = async () => {
-      try {
-        const newCounts = {};
-        for (const device of Object.keys(devices)) {
-          const response = await axios.get(
-            `http://localhost:8080/api/v1/count?device=${device}`
-          );
-          newCounts[device] = response.data.data;
-        }
-        setDeviceCount(newCounts);
+        // 👇 Gọi API lấy count cho từng thiết bị
+        const [tempCount, humidityCount, lightCount] = await Promise.all([
+          axios.get(
+            "http://localhost:8080/api/v1/count?device=temperatureDevice"
+          ),
+          axios.get("http://localhost:8080/api/v1/count?device=humidityDevice"),
+          axios.get("http://localhost:8080/api/v1/count?device=lightDevice"),
+        ]);
+
+        setDeviceCount({
+          temperatureDevice: tempCount.data.data,
+          humidityDevice: humidityCount.data.data,
+          lightDevice: lightCount.data.data,
+        });
       } catch (error) {
-        console.error("Lỗi khi lấy số lần bật thiết bị:", error);
+        console.error("Lỗi khi lấy trạng thái thiết bị:", error);
       }
     };
-    fetchAllDeviceCounts();
+
+    fetchDeviceStatus();
   }, []);
+
+  useEffect(() => {
+    if (statusMessage) {
+      const match = statusMessage.match(/led(\d)_(ON|OFF)_SUCCESS/);
+      if (match) {
+        const [, deviceNumber, action] = match;
+        let deviceKey = "";
+        if (deviceNumber === "1") deviceKey = "temperatureDevice";
+        else if (deviceNumber === "2") deviceKey = "humidityDevice";
+        else if (deviceNumber === "3") deviceKey = "lightDevice";
+
+        setDevices((prev) => ({
+          ...prev,
+          [deviceKey]: action === "ON",
+        }));
+
+        setLoading((prev) => ({
+          ...prev,
+          [deviceKey]: false,
+        }));
+      }
+    }
+  }, [statusMessage]);
 
   const toggleDevice = async (device) => {
     if (loading[device]) return;
 
     setLoading((prev) => ({ ...prev, [device]: true }));
-    setIsSuccess((prev) => ({ ...prev, [device]: null }));
-
     const newStatus = !devices[device];
-    const tempDevices = { ...devices, [device]: newStatus };
 
-    const ledPayload = {
-      led1: tempDevices.temperatureDevice ? "ON" : "OFF",
-      led2: tempDevices.humidityDevice ? "ON" : "OFF",
-      led3: tempDevices.lightDevice ? "ON" : "OFF",
-      led4: tempDevices.otherDevice ? "ON" : "OFF",
-    };
+    const ledPayload = {};
+    if (device === "temperatureDevice")
+      ledPayload.led1 = newStatus ? "ON" : "OFF";
+    if (device === "humidityDevice") ledPayload.led2 = newStatus ? "ON" : "OFF";
+    if (device === "lightDevice") ledPayload.led3 = newStatus ? "ON" : "OFF";
 
     try {
+      await axios.post("http://localhost:8080/mqtt/publish", ledPayload);
+      // await sendMQTTMessage(ledPayload);
+
       await axios.post(
         `http://localhost:8080/api/v1/update-status?device=${device}&status=${newStatus}`
       );
-
       const countResponse = await axios.get(
         `http://localhost:8080/api/v1/count?device=${device}`
       );
-
       setDeviceCount((prev) => ({
         ...prev,
         [device]: countResponse.data.data,
       }));
-
-      await axios.post("http://localhost:8080/mqtt/publish", ledPayload);
-
-      setTimeout(() => {
-        setDevices(tempDevices);
-        setIsSuccess((prev) => ({ ...prev, [device]: true }));
-        setLoading((prev) => ({ ...prev, [device]: false }));
-      }, 500);
+      setDevices((prev) => ({
+        ...prev,
+        [device]: newStatus,
+      }));
     } catch (error) {
-      console.error("Lỗi khi gửi API:", error);
-      setIsSuccess((prev) => ({ ...prev, [device]: false }));
-      setLoading((prev) => ({ ...prev, [device]: false }));
+      console.error("Lỗi khi điều khiển thiết bị:", error);
+    } finally {
+      setTimeout(() => {
+        setLoading((prev) => ({ ...prev, [device]: false }));
+      }, 1500);
     }
   };
 
-  useEffect(() => {
-    let interval;
-    if (flashOther) {
-      interval = setInterval(() => {
-        setDevices((prev) => ({
-          ...prev,
-          otherDevice: !prev.otherDevice, // đổi từ lightDevice → otherDevice
-        }));
-      }, 500);
-    } else {
-      setDevices((prev) => ({
-        ...prev,
-        otherDevice: false, // đổi từ lightDevice → otherDevice
-      }));
-    }
+  const [windStatus, setWindStatus] = useState(
+    windSpeedState > 50 ? "Tốc độ gió vượt ngưỡng!" : "Ổn định"
+  );
 
-    return () => clearInterval(interval);
-  }, [flashOther]);
+  useEffect(() => {
+    if (windSpeedState > 50) {
+      setWindStatus("Tốc độ gió vượt ngưỡng!");
+    } else {
+      const timeout = setTimeout(() => {
+        setWindStatus("Ổn định");
+      }, 200);
+      return () => clearTimeout(timeout);
+    }
+  }, [windSpeedState]);
 
   const deviceList = [
     {
@@ -129,11 +162,11 @@ const DeviceControl = ({ flashOther }) => {
       activeColor: "#ffeb3b",
     },
     {
-      label: "Đèn 4",
+      label: "Cảnh báo",
       key: "otherDevice",
-      icon: AiOutlineBulb,
+      icon: MdOutlineWarning,
       nameIcon: "light-icon",
-      activeColor: "#ffeb3b",
+      activeColor: "#fe2020",
     },
   ];
 
@@ -148,35 +181,48 @@ const DeviceControl = ({ flashOther }) => {
             <div
               key={key}
               className={`device-item ${devices[key] ? "active" : ""} ${
-                flashOther && key === "otherDevice" ? "flashing" : ""
+                blinkState && key === "otherDevice" ? "flashing" : ""
               }`}
             >
               <Icon
                 className={`device-icon ${nameIcon}`}
                 style={{
-                  color: devices[key] ? activeColor : "#ccc",
+                  color:
+                    devices[key] || (key === "otherDevice" && blinkState)
+                      ? activeColor
+                      : "#ccc",
                   transition: "color 0.3s ease-in-out",
                   fontSize: "2rem",
                 }}
               />
               <span className="device-label">{label}</span>
-              <div className="switch-container">
-                <Switch
-                  checked={devices[key]}
-                  onChange={() => toggleDevice(key)}
-                  className="device-switch"
-                  disabled={loading[key]}
-                />
-                {loading[key] && (
-                  <CircularProgress
-                    size={20}
-                    className="switch-loading-spinner"
+              {key !== "otherDevice" ? (
+                <div className="switch-container">
+                  <Switch
+                    checked={devices[key]}
+                    onChange={() => toggleDevice(key)}
+                    className="device-switch"
+                    disabled={loading[key]}
                   />
-                )}
-              </div>
-              <p className="device-count">
-                Đã bật: {deviceCount[key] || 0} lần
-              </p>
+                  {loading[key] && (
+                    <CircularProgress
+                      size={20}
+                      className="switch-loading-spinner"
+                    />
+                  )}
+                </div>
+              ) : (
+                <div className="switch-container placeholder-switch">
+                  <span className="status-label">{windStatus}</span>
+                </div>
+              )}
+
+              {/* Hiển thị số lần bật nếu không phải otherDevice */}
+              {key !== "otherDevice" && (
+                <p className="device-count">
+                  Đã bật: {deviceCount[key] || 0} lần
+                </p>
+              )}
             </div>
           ))}
         </div>
