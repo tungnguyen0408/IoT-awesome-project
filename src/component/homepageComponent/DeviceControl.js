@@ -5,15 +5,15 @@ import { MdAcUnit, MdOpacity, MdOutlineWarning } from "react-icons/md";
 import axios from "axios";
 const DeviceControl = ({ blinkState, windSpeedState, statusMessage }) => {
   const [devices, setDevices] = useState({
-    temperatureDevice: false,
-    humidityDevice: false,
-    lightDevice: false,
+    den2ice: false,
+    den1: false,
+    den3: false,
   });
 
   const [loading, setLoading] = useState({
-    temperatureDevice: false,
-    humidityDevice: false,
-    lightDevice: false,
+    den2ice: false,
+    den1: false,
+    den3: false,
     otherDevice: false,
   });
 
@@ -27,9 +27,9 @@ const DeviceControl = ({ blinkState, windSpeedState, statusMessage }) => {
         );
 
         const fetchedDevices = {
-          temperatureDevice: false,
-          humidityDevice: false,
-          lightDevice: false,
+          den2ice: false,
+          den1: false,
+          den3: false,
         };
 
         response.data.data.forEach((item) => {
@@ -42,17 +42,15 @@ const DeviceControl = ({ blinkState, windSpeedState, statusMessage }) => {
 
         // 👇 Gọi API lấy count cho từng thiết bị
         const [tempCount, humidityCount, lightCount] = await Promise.all([
-          axios.get(
-            "http://localhost:8080/api/v1/count?device=temperatureDevice"
-          ),
-          axios.get("http://localhost:8080/api/v1/count?device=humidityDevice"),
-          axios.get("http://localhost:8080/api/v1/count?device=lightDevice"),
+          axios.get("http://localhost:8080/api/v1/count?device=den2ice"),
+          axios.get("http://localhost:8080/api/v1/count?device=den1"),
+          axios.get("http://localhost:8080/api/v1/count?device=den3"),
         ]);
 
         setDeviceCount({
-          temperatureDevice: tempCount.data.data,
-          humidityDevice: humidityCount.data.data,
-          lightDevice: lightCount.data.data,
+          den2ice: tempCount.data.data,
+          den1: humidityCount.data.data,
+          den3: lightCount.data.data,
         });
       } catch (error) {
         console.error("Lỗi khi lấy trạng thái thiết bị:", error);
@@ -68,9 +66,9 @@ const DeviceControl = ({ blinkState, windSpeedState, statusMessage }) => {
       if (match) {
         const [, deviceNumber, action] = match;
         let deviceKey = "";
-        if (deviceNumber === "1") deviceKey = "temperatureDevice";
-        else if (deviceNumber === "2") deviceKey = "humidityDevice";
-        else if (deviceNumber === "3") deviceKey = "lightDevice";
+        if (deviceNumber === "1") deviceKey = "den2ice";
+        else if (deviceNumber === "2") deviceKey = "den1";
+        else if (deviceNumber === "3") deviceKey = "den3";
 
         setDevices((prev) => ({
           ...prev,
@@ -92,10 +90,9 @@ const DeviceControl = ({ blinkState, windSpeedState, statusMessage }) => {
     const newStatus = !devices[device];
 
     const ledPayload = {};
-    if (device === "temperatureDevice")
-      ledPayload.led1 = newStatus ? "ON" : "OFF";
-    if (device === "humidityDevice") ledPayload.led2 = newStatus ? "ON" : "OFF";
-    if (device === "lightDevice") ledPayload.led3 = newStatus ? "ON" : "OFF";
+    if (device === "den2ice") ledPayload.led1 = newStatus ? "ON" : "OFF";
+    if (device === "den1") ledPayload.led2 = newStatus ? "ON" : "OFF";
+    if (device === "den3") ledPayload.led3 = newStatus ? "ON" : "OFF";
 
     try {
       await axios.post("http://localhost:8080/mqtt/publish", ledPayload);
@@ -142,91 +139,125 @@ const DeviceControl = ({ blinkState, windSpeedState, statusMessage }) => {
   const deviceList = [
     {
       label: "Đèn 1",
-      key: "temperatureDevice",
+      key: "den2ice",
       icon: MdAcUnit,
       nameIcon: "temperature-icon",
       activeColor: "#03a9f4",
     },
     {
       label: "Đèn 2",
-      key: "humidityDevice",
+      key: "den1",
       icon: MdOpacity,
       nameIcon: "humidity-icon",
       activeColor: "#4caf50",
     },
     {
       label: "Đèn 3",
-      key: "lightDevice",
+      key: "den3",
       icon: AiOutlineBulb,
       nameIcon: "light-icon",
       activeColor: "#ffeb3b",
     },
     {
-      label: "Cảnh báo",
-      key: "otherDevice",
+      label: "Cảnh báo 1",
+      key: "otherDevice1",
+      icon: MdOutlineWarning,
+      nameIcon: "light-icon",
+      activeColor: "#fe2020",
+    },
+    {
+      label: "Cảnh báo 2",
+      key: "otherDevice2",
+      icon: MdOutlineWarning,
+      nameIcon: "light-icon",
+      activeColor: "#fe2020",
+    },
+    {
+      label: "Cảnh báo 3",
+      key: "otherDevice3",
       icon: MdOutlineWarning,
       nameIcon: "light-icon",
       activeColor: "#fe2020",
     },
   ];
 
-  const column1 = deviceList.slice(0, 2);
-  const column2 = deviceList.slice(2);
+  const column1 = deviceList.slice(0, 3);
+  const column2 = deviceList.slice(3);
 
   return (
     <div className="device-list-columns">
-      {[column1, column2].map((column, colIndex) => (
-        <div className="device-column" key={colIndex}>
-          {column.map(({ label, key, icon: Icon, nameIcon, activeColor }) => (
-            <div
-              key={key}
-              className={`device-item ${devices[key] ? "active" : ""} ${
-                blinkState && key === "otherDevice" ? "flashing" : ""
-              }`}
-            >
-              <Icon
-                className={`device-icon ${nameIcon}`}
-                style={{
-                  color:
-                    devices[key] || (key === "otherDevice" && blinkState)
-                      ? activeColor
-                      : "#ccc",
-                  transition: "color 0.3s ease-in-out",
-                  fontSize: "2rem",
-                }}
-              />
-              <span className="device-label">{label}</span>
-              {key !== "otherDevice" ? (
-                <div className="switch-container">
-                  <Switch
-                    checked={devices[key]}
-                    onChange={() => toggleDevice(key)}
-                    className="device-switch"
-                    disabled={loading[key]}
+      {/* Cột 1 */}
+      <div className="device-column">
+        {column1.map(({ label, key, icon: Icon, nameIcon, activeColor }) => (
+          <div
+            key={key}
+            className={`device-item ${devices[key] ? "active" : ""}`}
+          >
+            <Icon
+              className={`device-icon ${nameIcon}`}
+              style={{
+                color: devices[key] ? activeColor : "#ccc",
+                transition: "color 0.3s ease-in-out",
+                fontSize: "2rem",
+              }}
+            />
+            <span className="device-label">{label}</span>
+            {key.startsWith("den") ? (
+              <div className="switch-container">
+                <Switch
+                  checked={devices[key]}
+                  onChange={() => toggleDevice(key)}
+                  className="device-switch"
+                  disabled={loading[key]}
+                />
+                {loading[key] && (
+                  <CircularProgress
+                    size={20}
+                    className="switch-loading-spinner"
                   />
-                  {loading[key] && (
-                    <CircularProgress
-                      size={20}
-                      className="switch-loading-spinner"
-                    />
-                  )}
-                </div>
-              ) : (
-                <div className="switch-container placeholder-switch">
-                  <span className="status-label">{windStatus}</span>
-                </div>
-              )}
+                )}
+              </div>
+            ) : (
+              <div className="switch-container placeholder-switch">
+                <span className="status-label">{windStatus}</span>
+              </div>
+            )}
+            {key.startsWith("den") && (
+              <p className="device-count">
+                Đã bật: {deviceCount[key] || 0} lần
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
 
-              {/* Hiển thị số lần bật nếu không phải otherDevice */}
-              {key !== "otherDevice" && (
-                <p className="device-count">
-                  Đã bật: {deviceCount[key] || 0} lần
-                </p>
-              )}
+      {/* Cột 2 */}
+      <div className="device-column">
+        {column2.map(({ label, key, icon: Icon, nameIcon, activeColor }) => (
+          <div
+            key={key}
+            className={`device-item ${devices[key] ? "active" : ""} ${
+              blinkState && key.startsWith("otherDevice") ? "flashing" : ""
+            }`}
+          >
+            <Icon
+              className={`device-icon ${nameIcon}`}
+              style={{
+                color:
+                  devices[key] || (key.startsWith("otherDevice") && blinkState)
+                    ? activeColor
+                    : "#ccc",
+                transition: "color 0.3s ease-in-out",
+                fontSize: "2rem",
+              }}
+            />
+            <span className="device-label">{label}</span>
+            <div className="switch-container placeholder-switch">
+              <span className="status-label">{windStatus}</span>
             </div>
-          ))}
-        </div>
-      ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

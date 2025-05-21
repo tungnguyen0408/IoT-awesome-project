@@ -10,75 +10,81 @@ import {
 } from "recharts";
 import { FcComboChart } from "react-icons/fc";
 
+const ChartWrapper = ({ title, dataKey, stroke, fill, sensorData, name }) => (
+  <div
+    style={{
+      flex: 1, // chia đều chiều ngang
+      minWidth: 0, // để ResponsiveContainer không bị tràn
+      margin: "0 10px", // khoảng cách giữa các chart
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    }}
+  >
+    <h3 style={{ marginBottom: 10 }}>
+      <FcComboChart size={30} /> {title}
+    </h3>
+    <ResponsiveContainer width="100%" height={250}>
+      <AreaChart data={sensorData}>
+        <defs>
+          <linearGradient id={`color${dataKey}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={stroke} stopOpacity={0.8} />
+            <stop offset="95%" stopColor={stroke} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="time" />
+        <YAxis />
+        <Tooltip />
+        <Area
+          type="monotone"
+          dataKey={dataKey}
+          stroke={stroke}
+          fill={`url(#color${dataKey})`}
+          name={name}
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  </div>
+);
+
 const SensorChart = ({ sensorData }) => {
   return (
     <div
       className="chart-container"
       style={{
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
+        flexDirection: "row",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
         marginTop: "50px",
+        width: "100%",
       }}
     >
-      <h2>
-        <FcComboChart size={50} />
-        Biểu đồ hiển thị cảm biến
-      </h2>
-      <ResponsiveContainer width="100%" height={400}>
-        <AreaChart data={sensorData}>
-          <defs>
-            <linearGradient id="colorTemp" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#ff7300" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#ff7300" stopOpacity={0} />
-            </linearGradient>
-            <linearGradient id="colorHumidity" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#0088FE" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#0088FE" stopOpacity={0} />
-            </linearGradient>
-            <linearGradient id="colorLight" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#00C49F" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#00C49F" stopOpacity={0} />
-            </linearGradient>
-            <linearGradient id="colorWind" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#ff9800" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#ff9800" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="time" />
-          <YAxis />
-          <Tooltip />
-          <Area
-            type="monotone"
-            dataKey="temperature"
-            stroke="#ff7300"
-            fill="url(#colorTemp)"
-            name="Nhiệt độ"
-          />
-          <Area
-            type="monotone"
-            dataKey="humidity"
-            stroke="#0088FE"
-            fill="url(#colorHumidity)"
-            name="Độ ẩm"
-          />
-          <Area
-            type="monotone"
-            dataKey="light"
-            stroke="#00C49F"
-            fill="url(#colorLight)"
-            name="Ánh sáng"
-          />
-          <Area
-            type="monotone"
-            dataKey="wind"
-            stroke="#ff9800"
-            fill="url(#colorWind)"
-            name="Tốc độ gió"
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+      <ChartWrapper
+        title="Nhiệt độ"
+        dataKey="temperature"
+        stroke="#ff7300"
+        fill="#ff7300"
+        sensorData={sensorData}
+        name="Nhiệt độ"
+      />
+      <ChartWrapper
+        title="Độ ẩm"
+        dataKey="humidity"
+        stroke="#0088FE"
+        fill="#0088FE"
+        sensorData={sensorData}
+        name="Độ ẩm"
+      />
+      <ChartWrapper
+        title="Ánh sáng"
+        dataKey="light"
+        stroke="#00C49F"
+        fill="#00C49F"
+        sensorData={sensorData}
+        name="Ánh sáng"
+      />
     </div>
   );
 };

@@ -6,7 +6,6 @@ const SensorCards = ({ sensorData }) => {
     { label: "🌡️ Nhiệt độ", key: "temperature", unit: "°C" },
     { label: "💧 Độ ẩm", key: "humidity", unit: "%" },
     { label: "💡 Ánh sáng", key: "light", unit: "lux" },
-    { label: "💨 Tốc độ gió", key: "wind", unit: "m/s" },
   ];
   const latestData = sensorData[sensorData.length - 1];
 

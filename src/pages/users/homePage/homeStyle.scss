@@ -117,11 +117,13 @@
 
     .device-item {
         border          : 1px solid #ddd;
-        padding         : 12px;
+        padding         : 5px;
         border-radius   : 10px;
         text-align      : center;
         background-color: #fff;
         width           : 150px;
+        height          : 140px !important;
+
 
         .placeholder-switch {
             min-height     : 80px;
@@ -171,7 +173,7 @@
 }
 
 .device-count {
-    margin-top: 4px;
+    margin-top: -10px;
     font-size : 0.85rem;
     color     : #666;
 }
